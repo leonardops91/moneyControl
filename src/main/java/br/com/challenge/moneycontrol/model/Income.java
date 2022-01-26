@@ -1,12 +1,11 @@
 package br.com.challenge.moneycontrol.model;
 
 import java.time.LocalDate;
-import java.util.Date;
 
 import javax.persistence.*;
 
+import br.com.challenge.moneycontrol.enumerable.IncomeCategory;
 import br.com.challenge.moneycontrol.enumerable.Type;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 
 @Entity
@@ -18,7 +17,8 @@ public class Income {
 	private LocalDate date;
 	@Enumerated(EnumType.STRING)
 	private Type type;
-
+	@Enumerated(EnumType.STRING)
+	private IncomeCategory category;
 
 	@Override
 	public int hashCode() {
@@ -62,13 +62,15 @@ public class Income {
 		return true;
 	}
 
-	public Income(){};
-	public Income(String description, double value, LocalDate date, Type type) {
+	public Income(){}
+	public Income(String description, double value, LocalDate date, Type type
+			, IncomeCategory category) {
 		super();
 		this.description = description;
 		this.value = value;
 		this.date = date;
 		this.type = type;
+		this.category = category;
 	}
 
 	public int getId() {
@@ -99,5 +101,10 @@ public class Income {
 	public void setType(Type type) {
 		this.type = type;
 	}
-	
+	public IncomeCategory getCategory() {
+		return category;
+	}
+	public void setCategory(IncomeCategory category) {
+		this.category = category;
+	}
 }

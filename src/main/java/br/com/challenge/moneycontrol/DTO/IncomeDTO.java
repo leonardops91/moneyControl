@@ -1,15 +1,11 @@
 package br.com.challenge.moneycontrol.DTO;
 
+import br.com.challenge.moneycontrol.enumerable.IncomeCategory;
 import br.com.challenge.moneycontrol.enumerable.Type;
 import br.com.challenge.moneycontrol.model.Income;
 import org.springframework.data.domain.Page;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public class IncomeDTO {
     private int id;
@@ -17,6 +13,7 @@ public class IncomeDTO {
     private double value;
     private LocalDate date;
     private Type type;
+    private IncomeCategory category;
 
     public IncomeDTO(Income income) {
         this.id = income.getId();
@@ -24,6 +21,7 @@ public class IncomeDTO {
         this.value = income.getValue();
         this.date = income.getDate();
         this.type = income.getType();
+        this.category = income.getCategory();
     }
 
 
@@ -39,7 +37,11 @@ public class IncomeDTO {
         return date;
     }
 
-//    public static List<IncomeDTO> convert(List<Income> incomes) {
+    public IncomeCategory getCategory() {
+        return category;
+    }
+
+    //    public static List<IncomeDTO> convert(List<Income> incomes) {
 //        List<IncomeDTO> incomesDTO = new ArrayList<>();
 //        incomes.forEach(income -> {
 //            incomesDTO.add(new IncomeDTO(income));

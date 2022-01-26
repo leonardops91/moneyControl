@@ -1,5 +1,6 @@
 package br.com.challenge.moneycontrol.DTO;
 
+import br.com.challenge.moneycontrol.enumerable.OutcomeCategory;
 import br.com.challenge.moneycontrol.enumerable.Type;
 import br.com.challenge.moneycontrol.model.Income;
 import br.com.challenge.moneycontrol.model.Outcome;
@@ -10,20 +11,18 @@ import javax.validation.constraints.NotNull;
 import java.time.LocalDate;
 
 public class OutcomeDTO {
-    @NotNull @NotEmpty
     private String description;
-    @NotNull @NotEmpty
     private double value;
-    @NotNull @NotEmpty
     private LocalDate date;
-    @NotNull @NotEmpty
     private Type type;
+    private OutcomeCategory category;
 
     public OutcomeDTO(Outcome outcome) {
         this.description = outcome.getDescription();
         this.value = outcome.getValue();
         this.date = outcome.getDate();
         this.type = outcome.getType();
+        this.category = outcome.getCategory();
     }
 
     public String getDescription() {
@@ -56,6 +55,14 @@ public class OutcomeDTO {
 
     public void setType(Type type) {
         this.type = type;
+    }
+
+    public OutcomeCategory getCategory() {
+        return category;
+    }
+
+    public void setCategory(OutcomeCategory category) {
+        this.category = category;
     }
 
     public static Page<OutcomeDTO> convert(Page<Outcome> outcomes){

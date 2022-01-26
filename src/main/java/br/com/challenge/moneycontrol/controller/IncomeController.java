@@ -5,6 +5,7 @@ import br.com.challenge.moneycontrol.form.IncomeForm;
 import br.com.challenge.moneycontrol.model.Income;
 import br.com.challenge.moneycontrol.repository.IncomeRepository;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import javafx.util.converter.LocalDateStringConverter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
@@ -21,6 +22,8 @@ import javax.transaction.Transactional;
 import javax.validation.Valid;
 import javax.xml.ws.Response;
 import java.net.URI;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Optional;
 
@@ -32,14 +35,52 @@ public class IncomeController {
 
     @GetMapping
     @Cacheable(value = "ListaDeIncomes")
-    public Page<IncomeDTO> list(@PageableDefault(sort = "id", direction =
-            Sort.Direction.ASC, page = 0, size = 10) Pageable pagination) {
-        Page<Income> incomes = incomeRepository.findAll(pagination);
+    public Page<IncomeDTO> list(String descricao, @PageableDefault(sort = "id",
+            direction =
+                    Sort.Direction.ASC, page = 0, size = 10) Pageable pagination) {
+        Page<IncomeDTO> incomesDTO;
+        if (descricao == null) {
+            Page<Income> incomes = incomeRepository.findAll(pagination);
+            incomesDTO = IncomeDTO.convert(incomes);
+        } else {
+            Page<Income> incomes =
+                    incomeRepository.findByDescriptionIgnoreCaseContaining(descricao, pagination);
+            incomesDTO = IncomeDTO.convert(incomes);
+        }
+        return incomesDTO;
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<IncomeDTO> getIncome(@PathVariable int id) {
+        Optional<Income> income = incomeRepository.findById(id);
+        if (income.isPresent()) {
+            return ResponseEntity.ok(new IncomeDTO(income.get()));
+        }
+        return ResponseEntity.notFound().build();
+    }
+
+    @GetMapping("/{year}/{month}")
+    public Page<IncomeDTO> getIncomeByDate(
+            @PathVariable int year,
+            @PathVariable int month,
+            @PageableDefault(
+                    sort = "date",
+                    direction = Sort.Direction.ASC,
+                    page = 0,
+                    size = 10
+            ) Pageable pagination
+    ) {
+
+        LocalDate initalDate = LocalDate.of(year, month, 1);
+        LocalDate finalDate = LocalDate.of(year, month, initalDate.lengthOfMonth());
+        Page<Income> incomes =
+                incomeRepository.findByDateBetween(initalDate,
+                        finalDate, pagination);
         Page<IncomeDTO> incomesDTO = IncomeDTO.convert(incomes);
         return incomesDTO;
     }
 
-//    @GetMapping
+    //    @GetMapping
 //    @Cacheable(value = "ListaDeIncomes")
 //    public List<IncomeDTO> list(@PageableDefault(sort = "id", direction =
 //            Sort.Direction.DESC, page = 0, size = 10) Pageable paginacao) {
@@ -50,12 +91,12 @@ public class IncomeController {
 //        });
 //        return incomesDTO;
 //    }
-        @PostMapping(
+    @PostMapping(
             produces = MediaType.APPLICATION_JSON_VALUE)
-        @Transactional
+    @Transactional
     @CacheEvict(value = "ListaDeIncomes", allEntries = true)
     public ResponseEntity<IncomeDTO> save(@RequestBody @Valid IncomeForm incomeForm,
-                                          UriComponentsBuilder uriBuilder){
+                                          UriComponentsBuilder uriBuilder) {
         Income income = incomeForm.convert();
         incomeRepository.save(income);
         URI uri =
@@ -74,22 +115,14 @@ public class IncomeController {
 //        return "Ok, salvo com sucesso!";
 //    }
 
-    @GetMapping("/{id}")
-    public ResponseEntity<IncomeDTO> getIncome(@PathVariable int id) {
-        Optional<Income> income = incomeRepository.findById(id);
-        if(income.isPresent()){
-            return ResponseEntity.ok(new IncomeDTO(income.get()));
-        }
-        return ResponseEntity.notFound().build();
-    }
 
     @PutMapping("/{id}")
     @Transactional
     @CacheEvict(value = "ListaDeIncomes", allEntries = true)
     public ResponseEntity<IncomeDTO> update(@PathVariable int id,
-                                            @RequestBody @Valid IncomeForm form){
+                                            @RequestBody @Valid IncomeForm form) {
         Optional<Income> incomeOptional = incomeRepository.findById(id);
-        if(incomeOptional.isPresent()){
+        if (incomeOptional.isPresent()) {
             Income income = form.update(id, incomeRepository);
             return ResponseEntity.ok(new IncomeDTO(income));
         }
@@ -98,9 +131,9 @@ public class IncomeController {
 
     @DeleteMapping("/{id}")
     @Transactional
-    public ResponseEntity<?> delete(@PathVariable int id){
+    public ResponseEntity<?> delete(@PathVariable int id) {
         Optional<Income> incomeOptional = incomeRepository.findById(id);
-        if(incomeOptional.isPresent()){
+        if (incomeOptional.isPresent()) {
             incomeRepository.deleteById(id);
             return ResponseEntity.ok().build();
         }

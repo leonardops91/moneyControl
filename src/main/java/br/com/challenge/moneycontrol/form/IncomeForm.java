@@ -1,5 +1,6 @@
 package br.com.challenge.moneycontrol.form;
 
+import br.com.challenge.moneycontrol.enumerable.IncomeCategory;
 import br.com.challenge.moneycontrol.enumerable.Type;
 import br.com.challenge.moneycontrol.model.Income;
 import br.com.challenge.moneycontrol.repository.IncomeRepository;
@@ -8,6 +9,7 @@ import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 import java.time.LocalDate;
 import java.util.Date;
+
 
 public class IncomeForm {
     @NotNull @NotEmpty
@@ -18,6 +20,7 @@ public class IncomeForm {
     private LocalDate date;
     @NotNull @NotEmpty
     private Type type;
+    private IncomeCategory category = IncomeCategory.Outras;
 
     public String getDescription() {
         return description;
@@ -51,8 +54,16 @@ public class IncomeForm {
         this.type = type;
     }
 
+    public IncomeCategory getCategory() {
+        return category;
+    }
+
+    public void setCategory(IncomeCategory category) {
+        this.category = category;
+    }
+
     public Income convert(){
-        return new Income(description, value, date, type);
+        return new Income(description, value, date, type, category);
     }
 
     public Income update(int id, IncomeRepository incomeRepository) {
@@ -61,6 +72,7 @@ public class IncomeForm {
         income.setValue(this.value);
         income.setDate(this.date);
         income.setType(this.type);
+        income.setCategory(category);
         return income;
     }
 }

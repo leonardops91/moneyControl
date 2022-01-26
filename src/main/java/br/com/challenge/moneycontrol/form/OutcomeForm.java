@@ -1,12 +1,13 @@
-package br.com.challenge.moneycontrol.model;
+package br.com.challenge.moneycontrol.form;
 
+import br.com.challenge.moneycontrol.enumerable.OutcomeCategory;
 import br.com.challenge.moneycontrol.enumerable.Type;
+import br.com.challenge.moneycontrol.model.Outcome;
 import br.com.challenge.moneycontrol.repository.OutcomeRepository;
 
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 import java.time.LocalDate;
-import java.util.Optional;
 
 public class OutcomeForm {
     @NotNull @NotEmpty
@@ -17,13 +18,8 @@ public class OutcomeForm {
     private LocalDate date;
     @NotNull @NotEmpty
     private Type type;
+    private OutcomeCategory category = OutcomeCategory.Outras;
 
-    public OutcomeForm(String description, double value, LocalDate date, Type type) {
-        this.description = description;
-        this.value = value;
-        this.date = date;
-        this.type = type;
-    }
 
     public String getDescription() {
         return description;
@@ -57,8 +53,16 @@ public class OutcomeForm {
         this.type = type;
     }
 
+    public OutcomeCategory getCategory() {
+        return category;
+    }
+
+    public void setCategory(OutcomeCategory category) {
+        this.category = category;
+    }
+
     public Outcome convert() {
-        return new Outcome(description, value, date, type);
+        return new Outcome(description, value, date, type, category);
     }
 
     public Outcome update(int id, OutcomeRepository outcomeRepository) {
@@ -67,6 +71,7 @@ public class OutcomeForm {
         outcome.setValue(value);
         outcome.setDate(date);
         outcome.setType(type);
+        outcome.setCategory(category);
         return outcome;
     }
 }

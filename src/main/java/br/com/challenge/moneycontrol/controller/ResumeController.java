@@ -20,7 +20,7 @@ import java.util.List;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/resume")
+@RequestMapping("/resumo")
 public class ResumeController {
     private double totalIncome;
     private double totalOutcome;
@@ -37,35 +37,34 @@ public class ResumeController {
                                      @PathVariable int month) {
         LocalDate initialDate = LocalDate.of(year, month, 1);
         LocalDate finalDate = LocalDate.of(year, month, initialDate.lengthOfMonth());
-        Map<String, Double> TotalBalance = new HashMap<>();
+        Map<String, Double> totalBalance = new HashMap<>();
         setTotalOutcome(initialDate, finalDate);
         setTotalIncome(initialDate, finalDate);
         setBalance();
-        TotalBalance.put("TotalReceitas", totalIncome);
-        TotalBalance.put("TotalDespesas", totalOutcome);
-        TotalBalance.put("SaldoPeriodo", balance);
+        totalBalance.put("TotalReceitas", totalIncome);
+        totalBalance.put("TotalDespesas", totalOutcome);
+        totalBalance.put("SaldoPeriodo", balance);
 
         setOutcomeByCategory(initialDate, finalDate);
 
         Map<String, Map<String, Double>> resume = new HashMap<>();
 
-        resume.put("TotalGeral", TotalBalance);
+        resume.put("TotalGeral", totalBalance);
         resume.put("DespesaPorCategoria", outcomeByCategory);
 
         return resume;
-    }
-
-
-    public void setTotalIncome(LocalDate initialDate, LocalDate finalDate) {
-        Page<Income> incomes = incomeRepository.findByDateBetween(initialDate,
-                finalDate, Pageable.unpaged());
-        this.totalIncome = incomes.stream().mapToDouble(Income::getValue).sum();
     }
 
     public void setTotalOutcome(LocalDate initialDate, LocalDate finalDate) {
         Page<Outcome> outcomes = outcomeRepository.findByDateBetween(initialDate,
                 finalDate, Pageable.unpaged());
         this.totalOutcome = outcomes.stream().mapToDouble(Outcome::getValue).sum();
+    }
+
+    public void setTotalIncome(LocalDate initialDate, LocalDate finalDate) {
+        Page<Income> incomes = incomeRepository.findByDateBetween(initialDate,
+                finalDate, Pageable.unpaged());
+        this.totalIncome = incomes.stream().mapToDouble(Income::getValue).sum();
     }
 
     public void setBalance() {

@@ -37,6 +37,8 @@ public class OutcomeController {
         if (descricao == null) {
 
             Page<Outcome> outcomes = outcomeRepository.findAll(pagination);
+            System.out.println(outcomes);
+
             outcomesDTO = OutcomeDTO.convert(outcomes);
         } else {
             Page<Outcome> outcomesByDescription =
@@ -66,8 +68,7 @@ public class OutcomeController {
         Page<Outcome> outcomes =
                 outcomeRepository.findByDateBetween(initialDate, finalDate,
                         pagination);
-        Page<OutcomeDTO> outcomeDTOs = OutcomeDTO.convert(outcomes);
-        return outcomeDTOs;
+        return OutcomeDTO.convert(outcomes);
     }
 
     @PostMapping

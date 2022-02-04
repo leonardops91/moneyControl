@@ -12,11 +12,11 @@ import java.time.LocalDate;
 public class OutcomeForm {
     @NotNull @NotEmpty
     private String description;
-    @NotNull @NotEmpty
+    @NotNull
     private double value;
-    @NotNull @NotEmpty
+    @NotNull
     private LocalDate date;
-    @NotNull @NotEmpty
+    @NotNull
     private Type type;
     private OutcomeCategory category = OutcomeCategory.Outras;
 

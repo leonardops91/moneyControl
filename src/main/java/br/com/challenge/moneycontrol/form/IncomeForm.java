@@ -4,21 +4,22 @@ import br.com.challenge.moneycontrol.enumerable.IncomeCategory;
 import br.com.challenge.moneycontrol.enumerable.Type;
 import br.com.challenge.moneycontrol.model.Income;
 import br.com.challenge.moneycontrol.repository.IncomeRepository;
+import org.hibernate.validator.constraints.Length;
 
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
 import java.time.LocalDate;
-import java.util.Date;
 
 
 public class IncomeForm {
     @NotNull @NotEmpty
     private String description;
-    @NotNull @NotEmpty
+    @NotNull
     private double value;
-    @NotNull @NotEmpty
+    @NotNull
     private LocalDate date;
-    @NotNull @NotEmpty
+    @NotNull
     private Type type;
     private IncomeCategory category = IncomeCategory.Outras;
 

@@ -6,8 +6,6 @@ import br.com.challenge.moneycontrol.model.Income;
 import br.com.challenge.moneycontrol.model.Outcome;
 import org.springframework.data.domain.Page;
 
-import javax.validation.constraints.NotEmpty;
-import javax.validation.constraints.NotNull;
 import java.time.LocalDate;
 
 public class OutcomeDTO {
@@ -66,6 +64,7 @@ public class OutcomeDTO {
     }
 
     public static Page<OutcomeDTO> convert(Page<Outcome> outcomes){
+//        System.out.println(outcomes);
         return outcomes.map(OutcomeDTO::new);
     }
 }

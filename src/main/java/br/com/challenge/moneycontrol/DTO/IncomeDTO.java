@@ -4,6 +4,7 @@ import br.com.challenge.moneycontrol.enumerable.IncomeCategory;
 import br.com.challenge.moneycontrol.enumerable.Type;
 import br.com.challenge.moneycontrol.model.Income;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 import java.time.LocalDate;
 
@@ -49,6 +50,7 @@ public class IncomeDTO {
 //        return incomesDTO;
 //    }
     public static Page<IncomeDTO> convert(Page<Income> incomes){
+
         return incomes.map(IncomeDTO::new);
     }
 }

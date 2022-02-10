@@ -64,7 +64,6 @@ public class OutcomeDTO {
     }
 
     public static Page<OutcomeDTO> convert(Page<Outcome> outcomes){
-//        System.out.println(outcomes);
         return outcomes.map(OutcomeDTO::new);
     }
 }

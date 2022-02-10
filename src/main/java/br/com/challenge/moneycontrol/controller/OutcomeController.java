@@ -37,7 +37,6 @@ public class OutcomeController {
         if (descricao == null) {
 
             Page<Outcome> outcomes = outcomeRepository.findAll(pagination);
-            System.out.println(outcomes);
 
             outcomesDTO = OutcomeDTO.convert(outcomes);
         } else {
@@ -73,7 +72,7 @@ public class OutcomeController {
 
     @PostMapping
     @Transactional
-    @CacheEvict(value = "ListOfOutcomes", allEntries = true)
+    @CacheEvict(value = "listOfOutcomes", allEntries = true)
     public ResponseEntity<?> save(@RequestBody @Valid OutcomeForm form,
                                   UriComponentsBuilder uriBuilder) {
         Outcome outcome = form.convert();

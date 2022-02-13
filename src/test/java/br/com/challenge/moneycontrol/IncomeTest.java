@@ -68,7 +68,8 @@ public class IncomeTest {
 	public void setUp(){
 		objectMapper = new ObjectMapper();
 		objectMapper.findAndRegisterModules();
-		mockMvc = MockMvcBuilders.standaloneSetup(incomeController)
+		mockMvc = MockMvcBuilders
+				.standaloneSetup(incomeController)
 				.setCustomArgumentResolvers(new PageableHandlerMethodArgumentResolver())
 				.build();
 	}

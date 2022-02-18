@@ -28,9 +28,8 @@ public class AuthenticationController {
 
     @PostMapping
     public ResponseEntity<?> authenticate(@RequestBody @Valid LoginForm form){
-
+        UsernamePasswordAuthenticationToken authToken = form.convert();
         try {
-            UsernamePasswordAuthenticationToken authToken = form.convert();
             Authentication authentication =
                     authManager.authenticate(authToken);
             String token = tokenService.generateToken(authentication);

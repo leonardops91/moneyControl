@@ -1,6 +1,7 @@
 package br.com.challenge.moneycontrol.model;
 
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import javax.persistence.*;
@@ -11,13 +12,21 @@ import java.util.List;
 @Entity
 public class UserAccount implements UserDetails {
     private static final long serialVersionUID = 1L;
-    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String name;
     private String email;
     private String password;
     @ManyToMany(fetch = FetchType.EAGER)
-    private List<Profile> profile = new ArrayList<Profile>();
+    private List<Profile> profile = new ArrayList<>();
+
+    public UserAccount(){}
+    public UserAccount(String name, String email, String password) {
+        this.name = name;
+        this.email = email;
+        this.password = password;
+    }
 
     public Long getId() {
         return id;
@@ -28,14 +37,18 @@ public class UserAccount implements UserDetails {
         return this.profile;
     }
 
-    @Override
-    public String getPassword() {
-        return this.password;
+    public String getName() {
+        return this.name;
     }
 
     @Override
     public String getUsername() {
         return this.email;
+    }
+
+    @Override
+    public String getPassword() {
+        return this.password;
     }
 
     @Override

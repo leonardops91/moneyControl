@@ -19,7 +19,17 @@ public class Income {
 	private Type type;
 	@Enumerated(EnumType.STRING)
 	private IncomeCategory category;
+	@ManyToOne
+	@JoinColumn(name = "user_id")
+	private UserAccount user;
 
+	public UserAccount getUser() {
+		return user;
+	}
+
+	public void setUser(UserAccount user) {
+		this.user = user;
+	}
 
 	public Income(){}
 	public Income(String description, double value, LocalDate date, Type type

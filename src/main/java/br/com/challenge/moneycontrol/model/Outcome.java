@@ -24,8 +24,17 @@ public class Outcome {
     private Type type;
     @Enumerated(EnumType.STRING)
     private OutcomeCategory category;
+    @ManyToOne
+    @JoinColumn(name = "user_id")
+    private UserAccount user;
 
+    public UserAccount getUser() {
+        return user;
+    }
 
+    public void setUser(UserAccount user) {
+        this.user = user;
+    }
 
     public Outcome() {
     }

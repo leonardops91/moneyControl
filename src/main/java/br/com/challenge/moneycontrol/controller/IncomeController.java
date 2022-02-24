@@ -3,6 +3,7 @@ package br.com.challenge.moneycontrol.controller;
 import br.com.challenge.moneycontrol.DTO.IncomeDTO;
 import br.com.challenge.moneycontrol.form.IncomeForm;
 import br.com.challenge.moneycontrol.model.Income;
+import br.com.challenge.moneycontrol.model.UserAccount;
 import br.com.challenge.moneycontrol.repository.IncomeRepository;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import javafx.util.converter.LocalDateStringConverter;
@@ -15,6 +16,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
 
@@ -37,10 +39,11 @@ public class IncomeController {
     @Cacheable(value = "ListaDeIncomes")
     public Page<IncomeDTO> list(String descricao, @PageableDefault(sort = "id",
             direction =
-                    Sort.Direction.ASC, page = 0, size = 10) Pageable pagination) {
+                    Sort.Direction.ASC, page = 0, size = 10) Pageable pagination,
+                                @AuthenticationPrincipal UserAccount userLogged) {
         Page<IncomeDTO> incomesDTO;
         if (descricao == null) {
-            Page<Income> incomes = incomeRepository.findAll(pagination);
+            Page<Income> incomes = incomeRepository.findByUser(pagination, userLogged);
             incomesDTO = IncomeDTO.convert(incomes);
         } else {
             Page<Income> incomes =
@@ -51,9 +54,10 @@ public class IncomeController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<IncomeDTO> getIncome(@PathVariable int id) {
+    public ResponseEntity<IncomeDTO> getIncome(@PathVariable int id,
+                                               @AuthenticationPrincipal UserAccount loggedUser) {
         Optional<Income> income = incomeRepository.findById(id);
-        if (income.isPresent()) {
+        if (income.isPresent() && income.get().getUser() == loggedUser) {
             return ResponseEntity.ok(new IncomeDTO(income.get()));
         }
         return ResponseEntity.notFound().build();
@@ -68,16 +72,17 @@ public class IncomeController {
                     direction = Sort.Direction.ASC,
                     page = 0,
                     size = 10
-            ) Pageable pagination
+            ) Pageable pagination,
+            @AuthenticationPrincipal UserAccount loggedUser
     ) {
 
-        LocalDate initalDate = LocalDate.of(year, month, 1);
-        LocalDate finalDate = LocalDate.of(year, month, initalDate.lengthOfMonth());
+        LocalDate initialDate = LocalDate.of(year, month, 1);
+        LocalDate finalDate = LocalDate.of(year, month, initialDate.lengthOfMonth());
         Page<Income> incomes =
-                incomeRepository.findByDateBetween(initalDate,
+                incomeRepository.findByUserAndDateBetween(loggedUser,
+                        initialDate,
                         finalDate, pagination);
-        Page<IncomeDTO> incomesDTO = IncomeDTO.convert(incomes);
-        return incomesDTO;
+        return IncomeDTO.convert(incomes);
     }
 
     //    @GetMapping
@@ -96,8 +101,10 @@ public class IncomeController {
     @Transactional
     @CacheEvict(value = "ListaDeIncomes", allEntries = true)
     public ResponseEntity<IncomeDTO> save(@RequestBody @Valid IncomeForm incomeForm,
-                                          UriComponentsBuilder uriBuilder) {
+                                          UriComponentsBuilder uriBuilder,
+                                          @AuthenticationPrincipal UserAccount userLogged) {
         Income income = incomeForm.convert();
+        income.setUser(userLogged);
         incomeRepository.save(income);
         URI uri =
                 uriBuilder.path("/income/{id}").buildAndExpand(income.getId()).toUri();

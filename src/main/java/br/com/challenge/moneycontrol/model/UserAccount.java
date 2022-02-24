@@ -18,6 +18,10 @@ public class UserAccount implements UserDetails {
     private String name;
     private String email;
     private String password;
+//    @OneToMany
+//    private List<Income> incomes = new ArrayList<>();
+//    @OneToMany
+//    private List<Outcome> outcomes = new ArrayList<>();
     @ManyToMany(fetch = FetchType.EAGER)
     private List<Profile> profile = new ArrayList<>();
 

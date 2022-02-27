@@ -41,6 +41,16 @@ public class Income {
 		this.type = type;
 		this.category = category;
 	}
+	public Income(String description, double value, LocalDate date, Type type
+			, IncomeCategory category, UserAccount user) {
+		super();
+		this.description = description;
+		this.value = value;
+		this.date = date;
+		this.type = type;
+		this.category = category;
+		this.user = user;
+	}
 
 	public int getId() {
 		return id;

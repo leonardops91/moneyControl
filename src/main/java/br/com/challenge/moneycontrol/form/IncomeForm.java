@@ -3,6 +3,7 @@ package br.com.challenge.moneycontrol.form;
 import br.com.challenge.moneycontrol.enumerable.IncomeCategory;
 import br.com.challenge.moneycontrol.enumerable.Type;
 import br.com.challenge.moneycontrol.model.Income;
+import br.com.challenge.moneycontrol.model.UserAccount;
 import br.com.challenge.moneycontrol.repository.IncomeRepository;
 import org.hibernate.validator.constraints.Length;
 
@@ -22,6 +23,7 @@ public class IncomeForm {
     @NotNull
     private Type type;
     private IncomeCategory category = IncomeCategory.Outras;
+    private UserAccount user;
 
     public String getDescription() {
         return description;
@@ -63,8 +65,16 @@ public class IncomeForm {
         this.category = category;
     }
 
+    public UserAccount getUser() {
+        return user;
+    }
+
+    public void setUser(UserAccount user) {
+        this.user = user;
+    }
+
     public Income convert(){
-        return new Income(description, value, date, type, category);
+        return new Income(description, value, date, type, category, user);
     }
 
     public Income update(int id, IncomeRepository incomeRepository) {

@@ -1,41 +1,40 @@
 package br.com.challenge.moneycontrol;
 
 
-import br.com.challenge.moneycontrol.DTO.IncomeDTO;
 import br.com.challenge.moneycontrol.controller.IncomeController;
+import br.com.challenge.moneycontrol.controller.UserController;
 import br.com.challenge.moneycontrol.enumerable.IncomeCategory;
+import br.com.challenge.moneycontrol.enumerable.Type;
 import br.com.challenge.moneycontrol.form.IncomeForm;
+import br.com.challenge.moneycontrol.model.Income;
+import br.com.challenge.moneycontrol.model.UserAccount;
 import br.com.challenge.moneycontrol.repository.IncomeRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Before;
 import org.junit.Test;
-
-import br.com.challenge.moneycontrol.enumerable.Type;
-import br.com.challenge.moneycontrol.model.Income;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
-import org.mockito.stubbing.OngoingStubbing;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.domain.*;
-import org.springframework.data.web.PageableDefault;
 import org.springframework.data.web.PageableHandlerMethodArgumentResolver;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.springframework.web.context.WebApplicationContext;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-import static org.mockito.Mockito.*;
 import static org.hamcrest.Matchers.is;
+import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -43,6 +42,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @ContextConfiguration(classes = {
 		IncomeController.class
 })
+@WebAppConfiguration
 public class IncomeTest {
 	Pageable pagination = PageRequest.of(0, 10, Sort.Direction.ASC, "id");
 
@@ -52,6 +52,13 @@ public class IncomeTest {
 	//Instância do ObjectMapper para trabalhar com JSON
 	private ObjectMapper objectMapper;
 
+	private UserAccount user = new UserAccount(
+			1L,
+			"Test",
+			"test@test.com",
+			"12345"
+	);
+
 	//Controller REST tratado por meio de injeção de dependências
 	@Autowired
 	private IncomeController incomeController;
@@ -59,13 +66,19 @@ public class IncomeTest {
 	//Instância do MockMVC
 	private MockMvc mockMvc;
 
+	//Instância do mock controlador do usuário
+	@MockBean
+	private UserController userController;
+
 	//Instância do mock repositório
 	@MockBean
 	private IncomeRepository incomeRepository;
 
 
+
 	@Before
 	public void setUp(){
+		when(userController.currentUser()).thenReturn(user);
 		objectMapper = new ObjectMapper();
 		objectMapper.findAndRegisterModules();
 		mockMvc = MockMvcBuilders
@@ -83,16 +96,18 @@ public class IncomeTest {
 		form.setType(Type.Fixa);
 		form.setCategory(IncomeCategory.Dividendos);
 		Income income = form.convert();
+		income.setUser(user);
 		form.setDescription("teste 2");
 		form.setValue(800);
 		Income income1 = form.convert();
+		income1.setUser(user);
 
 		List<Income> list = new ArrayList<>();
 		list.add(income);
 		list.add(income1);
 		Page<Income> incomes = new PageImpl<>(list, pagination, 2);
 
-		Mockito.when(incomeRepository.findAll(pagination)).thenReturn(incomes);
+		when(incomeRepository.findByUser(pagination, user)).thenReturn(incomes);
 
 
 		mockMvc.perform(get(BASE_URL))
@@ -101,12 +116,12 @@ public class IncomeTest {
 				.andExpect(jsonPath("$.totalElements", is(2)));
 	}
 
-
 	@Test
 	public void deveRetornarValorDaReceitaPeloId() throws Exception {
 		Income income = new Income("Teste", 210, LocalDate.of(2022, 12, 1),
 				Type.Fixa,
 				IncomeCategory.Dividendos);
+		income.setUser(user);
 
 				when(incomeRepository.findById(1)).thenReturn(Optional.of(income));
 
@@ -149,6 +164,7 @@ public class IncomeTest {
 		form.setType(Type.Fixa);
 		form.setCategory(IncomeCategory.Dividendos);
 		Income income = form.convert();
+		income.setUser(user);
 
 		when(incomeRepository.findById(1)).thenReturn(Optional.of(income));
 		when(incomeRepository.getById(1)).thenReturn(income);
@@ -170,6 +186,7 @@ public class IncomeTest {
 		form.setDate(LocalDate.of(2022, 11, 15));
 		form.setType(Type.Fixa);
 		form.setCategory(IncomeCategory.Dividendos);
+		form.setUser(user);
 		Income income = form.convert();
 
 		when(incomeRepository.findById(1)).thenReturn(Optional.of(income));

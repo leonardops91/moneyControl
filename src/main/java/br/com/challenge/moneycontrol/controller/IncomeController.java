@@ -30,20 +30,24 @@ import java.util.List;
 import java.util.Optional;
 
 @RestController
-@RequestMapping("/receitas")
+@RequestMapping(value = "/receitas")
 public class IncomeController {
     @Autowired
     private IncomeRepository incomeRepository;
+
+    @Autowired
+    private UserController userController;
+
 
     @GetMapping
     @Cacheable(value = "ListaDeIncomes")
     public Page<IncomeDTO> list(String descricao, @PageableDefault(sort = "id",
             direction =
-                    Sort.Direction.ASC, page = 0, size = 10) Pageable pagination,
-                                @AuthenticationPrincipal UserAccount userLogged) {
+                    Sort.Direction.ASC, page = 0, size = 10) Pageable pagination) {
         Page<IncomeDTO> incomesDTO;
         if (descricao == null) {
-            Page<Income> incomes = incomeRepository.findByUser(pagination, userLogged);
+            Page<Income> incomes = incomeRepository.findByUser(pagination,
+                    userController.currentUser());
             incomesDTO = IncomeDTO.convert(incomes);
         } else {
             Page<Income> incomes =
@@ -54,10 +58,10 @@ public class IncomeController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<IncomeDTO> getIncome(@PathVariable int id,
-                                               @AuthenticationPrincipal UserAccount loggedUser) {
+    public ResponseEntity<IncomeDTO> getIncome(@PathVariable int id) {
         Optional<Income> income = incomeRepository.findById(id);
-        if (income.isPresent() && income.get().getUser() == loggedUser) {
+        if (income.isPresent()
+                && income.get().getUser().equals(userController.currentUser())) {
             return ResponseEntity.ok(new IncomeDTO(income.get()));
         }
         return ResponseEntity.notFound().build();
@@ -72,16 +76,17 @@ public class IncomeController {
                     direction = Sort.Direction.ASC,
                     page = 0,
                     size = 10
-            ) Pageable pagination,
-            @AuthenticationPrincipal UserAccount loggedUser
+            ) Pageable pagination
     ) {
 
         LocalDate initialDate = LocalDate.of(year, month, 1);
         LocalDate finalDate = LocalDate.of(year, month, initialDate.lengthOfMonth());
         Page<Income> incomes =
-                incomeRepository.findByUserAndDateBetween(loggedUser,
+                incomeRepository.findByUserAndDateBetween(
+                        userController.currentUser(),
                         initialDate,
-                        finalDate, pagination);
+                        finalDate,
+                        pagination);
         return IncomeDTO.convert(incomes);
     }
 
@@ -101,10 +106,9 @@ public class IncomeController {
     @Transactional
     @CacheEvict(value = "ListaDeIncomes", allEntries = true)
     public ResponseEntity<IncomeDTO> save(@RequestBody @Valid IncomeForm incomeForm,
-                                          UriComponentsBuilder uriBuilder,
-                                          @AuthenticationPrincipal UserAccount userLogged) {
+                                          UriComponentsBuilder uriBuilder) {
         Income income = incomeForm.convert();
-        income.setUser(userLogged);
+        income.setUser(userController.currentUser());
         incomeRepository.save(income);
         URI uri =
                 uriBuilder.path("/income/{id}").buildAndExpand(income.getId()).toUri();
@@ -129,7 +133,9 @@ public class IncomeController {
     public ResponseEntity<IncomeDTO> update(@PathVariable int id,
                                             @RequestBody @Valid IncomeForm form) {
         Optional<Income> incomeOptional = incomeRepository.findById(id);
-        if (incomeOptional.isPresent()) {
+
+        if (incomeOptional.isPresent()
+                && incomeOptional.get().getUser().equals(userController.currentUser())) {
             Income income = form.update(id, incomeRepository);
             return ResponseEntity.ok(new IncomeDTO(income));
         }
@@ -138,9 +144,11 @@ public class IncomeController {
 
     @DeleteMapping("/{id}")
     @Transactional
-    public ResponseEntity<?> delete(@PathVariable int id) {
+    public ResponseEntity<?> delete(@PathVariable int id,
+                                    @AuthenticationPrincipal UserAccount loggedUser) {
         Optional<Income> incomeOptional = incomeRepository.findById(id);
-        if (incomeOptional.isPresent()) {
+        if (incomeOptional.isPresent() &&
+                incomeOptional.get().getUser().equals(userController.currentUser())) {
             incomeRepository.deleteById(id);
             return ResponseEntity.ok().build();
         }

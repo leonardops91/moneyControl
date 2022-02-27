@@ -1,13 +1,13 @@
 package br.com.challenge.moneycontrol.model;
 
 import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import javax.persistence.*;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Objects;
 
 @Entity
 public class UserAccount implements UserDetails {
@@ -32,9 +32,30 @@ public class UserAccount implements UserDetails {
         this.password = password;
     }
 
+    public UserAccount(Long id, String name, String email, String password) {
+        this.id = id;
+        this.name = name;
+        this.email = email;
+        this.password = password;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        UserAccount that = (UserAccount) o;
+        return id.equals(that.id) && email.equals(that.email);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, email);
+    }
+
     public Long getId() {
         return id;
     }
+
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

@@ -2,11 +2,13 @@ package br.com.challenge.moneycontrol;
 
 import br.com.challenge.moneycontrol.controller.OutcomeController;
 import br.com.challenge.moneycontrol.controller.ResumeController;
+import br.com.challenge.moneycontrol.controller.UserController;
 import br.com.challenge.moneycontrol.enumerable.IncomeCategory;
 import br.com.challenge.moneycontrol.enumerable.OutcomeCategory;
 import br.com.challenge.moneycontrol.enumerable.Type;
 import br.com.challenge.moneycontrol.model.Income;
 import br.com.challenge.moneycontrol.model.Outcome;
+import br.com.challenge.moneycontrol.model.UserAccount;
 import br.com.challenge.moneycontrol.repository.IncomeRepository;
 import br.com.challenge.moneycontrol.repository.OutcomeRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -46,6 +48,12 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 })
 public class ResumeControllerTest {
     private String BASE_URL = "/resumo";
+    private UserAccount user = new UserAccount(
+            1L,
+            "Test",
+            "test@test.com",
+            "12345"
+    );
 
     @Autowired
     private ResumeController resumeController;
@@ -56,10 +64,14 @@ public class ResumeControllerTest {
     @MockBean
     private OutcomeRepository outcomeRepository;
 
+    @MockBean
+    private UserController userController;
+
     private MockMvc mockMvc;
 
     @Before
     public void setUp(){
+        when(userController.currentUser()).thenReturn(user);
         mockMvc = MockMvcBuilders.standaloneSetup(resumeController).build();
     }
 
@@ -72,10 +84,10 @@ public class ResumeControllerTest {
         Outcome outcome = new Outcome("teste2", 225, LocalDate.of(2022, 12,
                 18),
                 Type.Variável,
-                OutcomeCategory.Alimentação);
+                OutcomeCategory.Alimentação, user);
         Income income = new Income("Teste", 225, LocalDate.of(2022, 12, 1),
                 Type.Fixa,
-                IncomeCategory.Dividendos);
+                IncomeCategory.Dividendos, user);
 
         List<Outcome> listOfOutcomes = new ArrayList<>();
         List<Income> listOfIncomes = new ArrayList<>();
@@ -90,14 +102,16 @@ public class ResumeControllerTest {
                 Pageable.unpaged(),
                 1);
 
-        when(outcomeRepository.findByDateBetween(initialDate, finalDate,
+        when(outcomeRepository.findByUserAndDateBetween(userController.currentUser(), initialDate,
+                finalDate,
                 Pageable.unpaged())).thenReturn(pageOfOutcomes);
-        when(incomeRepository.findByDateBetween(initialDate, finalDate,
+        when(incomeRepository.findByUserAndDateBetween(userController.currentUser(), initialDate,
+                finalDate,
                 Pageable.unpaged())).thenReturn(pageOfIncomes);
         List<OutcomeCategory> list = Arrays.asList(OutcomeCategory.values());
         for (int i = 0; i<list.size(); i++ ){
             OutcomeCategory category = list.get(i);
-            when(outcomeRepository.findByCategoryAndDateBetween(category,
+            when(outcomeRepository.findByUserAndCategoryAndDateBetween(userController.currentUser(), category,
                     initialDate, finalDate, Pageable.unpaged()
             )).thenReturn(pageOfOutcomes);
         }
@@ -107,11 +121,12 @@ public class ResumeControllerTest {
                 .andExpect(jsonPath("$.TotalGeral.SaldoPeriodo", is(0.0)))
                 .andExpect(jsonPath("$.DespesaPorCategoria.Alimentação",
                         is(225.0)));
-        verify(outcomeRepository, times(1)).findByDateBetween(initialDate,
+        verify(outcomeRepository, times(1)).findByUserAndDateBetween(userController.currentUser(), initialDate,
                 finalDate, Pageable.unpaged());
-        verify(incomeRepository, times(1)).findByDateBetween(initialDate,
+        verify(incomeRepository, times(1)).findByUserAndDateBetween(userController.currentUser(), initialDate,
                 finalDate, Pageable.unpaged());
-        verify(outcomeRepository, times(1)).findByCategoryAndDateBetween(OutcomeCategory.Alimentação, initialDate, finalDate, Pageable.unpaged());
+        verify(outcomeRepository, times(1)).findByUserAndCategoryAndDateBetween(userController.currentUser(), OutcomeCategory.Alimentação,
+                initialDate, finalDate, Pageable.unpaged());
 
     }
 }

@@ -28,14 +28,6 @@ public class Outcome {
     @JoinColumn(name = "user_id")
     private UserAccount user;
 
-    public UserAccount getUser() {
-        return user;
-    }
-
-    public void setUser(UserAccount user) {
-        this.user = user;
-    }
-
     public Outcome() {
     }
 
@@ -47,6 +39,17 @@ public class Outcome {
         this.date = date;
         this.type = type;
         this.category = category;
+    }
+
+    public Outcome(String description, double value, LocalDate date,
+                   Type type, OutcomeCategory category, UserAccount user) {
+        super();
+        this.description = description;
+        this.value = value;
+        this.date = date;
+        this.type = type;
+        this.category = category;
+        this.user = user;
     }
 
     public int getId() {
@@ -91,5 +94,13 @@ public class Outcome {
 
     public void setCategory(OutcomeCategory category) {
         this.category = category;
+    }
+
+    public UserAccount getUser() {
+        return user;
+    }
+
+    public void setUser(UserAccount user) {
+        this.user = user;
     }
 }

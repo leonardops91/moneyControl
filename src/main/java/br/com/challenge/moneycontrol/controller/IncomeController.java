@@ -45,15 +45,17 @@ public class IncomeController {
             direction =
                     Sort.Direction.ASC, page = 0, size = 10) Pageable pagination) {
         Page<IncomeDTO> incomesDTO;
+        Page<Income> incomes;
         if (descricao == null) {
-            Page<Income> incomes = incomeRepository.findByUser(pagination,
-                    userController.currentUser());
-            incomesDTO = IncomeDTO.convert(incomes);
+            incomes =
+                    incomeRepository.findByUser(userController.currentUser(),
+                            pagination);
         } else {
-            Page<Income> incomes =
-                    incomeRepository.findByDescriptionIgnoreCaseContaining(descricao, pagination);
-            incomesDTO = IncomeDTO.convert(incomes);
+            incomes =
+                    incomeRepository.findByUserAndDescriptionIgnoreCaseContaining(userController.currentUser(), descricao,
+                            pagination);
         }
+        incomesDTO = IncomeDTO.convert(incomes);
         return incomesDTO;
     }
 
@@ -78,7 +80,6 @@ public class IncomeController {
                     size = 10
             ) Pageable pagination
     ) {
-
         LocalDate initialDate = LocalDate.of(year, month, 1);
         LocalDate finalDate = LocalDate.of(year, month, initialDate.lengthOfMonth());
         Page<Income> incomes =
@@ -104,7 +105,7 @@ public class IncomeController {
     @PostMapping(
             produces = MediaType.APPLICATION_JSON_VALUE)
     @Transactional
-    @CacheEvict(value = "ListaDeIncomes", allEntries = true)
+    @CacheEvict(value = "ListOfIncomes", allEntries = true)
     public ResponseEntity<IncomeDTO> save(@RequestBody @Valid IncomeForm incomeForm,
                                           UriComponentsBuilder uriBuilder) {
         Income income = incomeForm.convert();

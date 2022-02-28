@@ -8,13 +8,15 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import java.time.LocalDate;
 
 public interface IncomeRepository extends JpaRepository<Income, Integer> {
-    Page<Income> findByDescriptionIgnoreCaseContaining(String description,
-                                                       Pageable pagination);
     Page<Income> findByDateBetween(LocalDate initialDate,
                                       LocalDate finalDate,
                                       Pageable pagination);
 
-    Page<Income> findByUser(Pageable pagination, UserAccount userLogged);
 
-    Page<Income> findByUserAndDateBetween(UserAccount loggedUser, LocalDate initialDate, LocalDate finalDate, Pageable pagination);
+
+    Page<Income> findByUser(UserAccount currentUser, Pageable pagination);
+
+    Page<Income> findByUserAndDescriptionIgnoreCaseContaining(UserAccount currentUser, String descricao, Pageable pagination);
+
+    Page<Income> findByUserAndDateBetween(UserAccount currentUser, LocalDate initialDate, LocalDate finalDate, Pageable pagination);
 }

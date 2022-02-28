@@ -25,47 +25,56 @@ import java.util.Optional;
 @RequestMapping("/despesas")
 public class OutcomeController {
     @Autowired
-    OutcomeRepository outcomeRepository;
+    private OutcomeRepository outcomeRepository;
+
+    @Autowired
+    private UserController userController;
 
     @GetMapping
     @Cacheable(value = "listOfOutcomes")
-    public Page<OutcomeDTO> list(String descricao,
-                                 @PageableDefault(sort = "id", direction = Sort.Direction.ASC,
+    public Page<OutcomeDTO> list(String descricao, @PageableDefault(sort = "id", direction = Sort.Direction.ASC,
                                          page = 0, size = 10) Pageable pagination
     ) {
         Page<OutcomeDTO> outcomesDTO;
+        Page<Outcome> outcomes;
         if (descricao == null) {
-
-            Page<Outcome> outcomes = outcomeRepository.findAll(pagination);
-
-            outcomesDTO = OutcomeDTO.convert(outcomes);
+            outcomes = outcomeRepository.findByUser(pagination,
+                    userController.currentUser());
         } else {
-            Page<Outcome> outcomesByDescription =
-                    outcomeRepository.findByDescriptionIgnoreCaseContaining(descricao,
-                            pagination);
-            outcomesDTO = OutcomeDTO.convert(outcomesByDescription);
+            outcomes =
+                    outcomeRepository.findByUserAndDescriptionIgnoreCaseContaining(descricao,
+                            pagination, userController.currentUser());
         }
+        outcomesDTO = OutcomeDTO.convert(outcomes);
         return outcomesDTO;
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<OutcomeDTO> getOutcome(@PathVariable int id) {
-        Optional<Outcome> outcomeOptional = outcomeRepository.findById(id);
-        if (outcomeOptional.isPresent()) {
-            return ResponseEntity.ok(new OutcomeDTO(outcomeOptional.get()));
+        Optional<Outcome> outcome = outcomeRepository.findById(id);
+        if (outcome.isPresent() && outcome.get().getUser().equals(userController.currentUser())) {
+            return ResponseEntity.ok(new OutcomeDTO(outcome.get()));
         }
         return ResponseEntity.notFound().build();
     }
 
     @GetMapping("/{year}/{month}")
-    public Page<OutcomeDTO> getOutcomesByDate(@PathVariable int year
-            , @PathVariable int month, @PageableDefault(sort = "date",
-            direction = Sort.Direction.ASC, page = 0, size = 10) Pageable pagination) {
+    public Page<OutcomeDTO> getOutcomesByDate(
+            @PathVariable int year,
+            @PathVariable int month,
+            @PageableDefault(
+                    sort = "date",
+                    direction = Sort.Direction.ASC,
+                    page = 0, size = 10
+            ) Pageable pagination
+    ) {
         LocalDate initialDate = LocalDate.of(year, month, 1);
-        LocalDate finalDate = LocalDate.of(year, month,
-                initialDate.lengthOfMonth());
+        LocalDate finalDate = LocalDate.of(year, month, initialDate.lengthOfMonth());
         Page<Outcome> outcomes =
-                outcomeRepository.findByDateBetween(initialDate, finalDate,
+                outcomeRepository.findByUserAndDateBetween(
+                        userController.currentUser(),
+                        initialDate,
+                        finalDate,
                         pagination);
         return OutcomeDTO.convert(outcomes);
     }
@@ -76,6 +85,7 @@ public class OutcomeController {
     public ResponseEntity<?> save(@RequestBody @Valid OutcomeForm form,
                                   UriComponentsBuilder uriBuilder) {
         Outcome outcome = form.convert();
+        outcome.setUser(userController.currentUser());
         outcomeRepository.save(outcome);
         URI uri =
                 uriBuilder.path("/outcomes/{id}").buildAndExpand(outcome.getId()).toUri();
@@ -88,7 +98,7 @@ public class OutcomeController {
     public ResponseEntity<OutcomeDTO> update(@PathVariable int id,
                                              @RequestBody @Valid OutcomeForm form) {
         Optional<Outcome> outcomeOptional = outcomeRepository.findById(id);
-        if (outcomeOptional.isPresent()) {
+        if (outcomeOptional.isPresent() && outcomeOptional.get().getUser().equals(userController.currentUser())) {
             Outcome outcome = form.update(id, outcomeRepository);
             return ResponseEntity.ok(new OutcomeDTO(outcome));
         }
@@ -99,7 +109,7 @@ public class OutcomeController {
     @Transactional
     public ResponseEntity<?> delete(@PathVariable int id) {
         Optional<Outcome> outcomeOptional = outcomeRepository.findById(id);
-        if (outcomeOptional.isPresent()) {
+        if (outcomeOptional.isPresent() && outcomeOptional.get().getUser().equals(userController.currentUser())) {
             outcomeRepository.deleteById(id);
             return ResponseEntity.ok().build();
         }

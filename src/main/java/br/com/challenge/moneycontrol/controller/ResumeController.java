@@ -28,9 +28,11 @@ public class ResumeController {
     private Map<String, Double> outcomeByCategory = new HashMap<>();
 
     @Autowired
-    OutcomeRepository outcomeRepository;
+    private OutcomeRepository outcomeRepository;
     @Autowired
-    IncomeRepository incomeRepository;
+    private IncomeRepository incomeRepository;
+    @Autowired
+    private UserController userController;
 
     @GetMapping("/{year}/{month}")
     public Map<String,Map<String, Double>> test(@PathVariable int year,
@@ -56,13 +58,15 @@ public class ResumeController {
     }
 
     public void setTotalOutcome(LocalDate initialDate, LocalDate finalDate) {
-        Page<Outcome> outcomes = outcomeRepository.findByDateBetween(initialDate,
+        Page<Outcome> outcomes =
+                outcomeRepository.findByUserAndDateBetween(userController.currentUser(), initialDate,
                 finalDate, Pageable.unpaged());
         this.totalOutcome = outcomes.stream().mapToDouble(Outcome::getValue).sum();
     }
 
     public void setTotalIncome(LocalDate initialDate, LocalDate finalDate) {
-        Page<Income> incomes = incomeRepository.findByDateBetween(initialDate,
+        Page<Income> incomes =
+                incomeRepository.findByUserAndDateBetween(userController.currentUser(), initialDate,
                 finalDate, Pageable.unpaged());
         this.totalIncome = incomes.stream().mapToDouble(Income::getValue).sum();
     }
@@ -77,7 +81,7 @@ public class ResumeController {
         for(int i = 0; i < list.size(); i++){
             OutcomeCategory category = list.get(i);
            Page<Outcome> outcomesByCategory=
-                    outcomeRepository.findByCategoryAndDateBetween(category,
+                    outcomeRepository.findByUserAndCategoryAndDateBetween(userController.currentUser(),category,
                     initialDate, finalDate, Pageable.unpaged());
            double sumOfCategory =
                    outcomesByCategory.stream().mapToDouble(Outcome::getValue).sum();

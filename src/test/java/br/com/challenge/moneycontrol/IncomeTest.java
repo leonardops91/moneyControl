@@ -88,7 +88,7 @@ public class IncomeTest {
 	}
 
 	@Test
-	public void deveRetornarTodasAsReceitasDoBancoComPaginacao() throws Exception{
+	public void deveRetornarReceitasDoUsuarioComPaginacao() throws Exception{
 		IncomeForm form = new IncomeForm();
 		form.setDescription("Teste");
 		form.setValue(600);
@@ -107,7 +107,7 @@ public class IncomeTest {
 		list.add(income1);
 		Page<Income> incomes = new PageImpl<>(list, pagination, 2);
 
-		when(incomeRepository.findByUser(pagination, user)).thenReturn(incomes);
+		when(incomeRepository.findByUser(user, pagination)).thenReturn(incomes);
 
 
 		mockMvc.perform(get(BASE_URL))
@@ -136,7 +136,7 @@ public class IncomeTest {
 	}
 
 	@Test
-	public void deveInserirObjetoComSucessoNoBD() throws Exception {
+	public void deveInserirReceitaComSucessoNoBD() throws Exception {
 		IncomeForm form = new IncomeForm();
 		form.setDescription("Teste");
 		form.setValue(550);
@@ -147,12 +147,13 @@ public class IncomeTest {
 
 		when(incomeRepository.save(any(Income.class))).thenReturn(income);
 
-		mockMvc.perform(post(BASE_URL).content(objectMapper.writeValueAsString(form)).header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON))
+		mockMvc.perform(post(BASE_URL)
+						.content(objectMapper.writeValueAsString(form))
+						.header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON))
 				.andExpect(status().isCreated())
 				.andExpect(jsonPath("$.description", is("Teste")))
 				.andExpect(jsonPath("$.value", is(550.0)))
 				.andExpect(jsonPath("$.category", is("Dividendos")));
-//		verify(incomeRepository).save(income);
 	}
 
 	@Test
@@ -167,6 +168,7 @@ public class IncomeTest {
 		income.setUser(user);
 
 		when(incomeRepository.findById(1)).thenReturn(Optional.of(income));
+		form.setValue(1000);
 		when(incomeRepository.getById(1)).thenReturn(income);
 		when(incomeRepository.save(any(Income.class))).thenReturn(income);
 
@@ -175,7 +177,7 @@ public class IncomeTest {
 				.header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON))
 				.andExpect(status().isOk())
 				.andExpect(jsonPath("$.description", is("Teste")))
-				.andExpect(jsonPath("$.value", is(600.0)));
+				.andExpect(jsonPath("$.value", is(1000.0)));
 	}
 
 	@Test

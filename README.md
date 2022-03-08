@@ -13,7 +13,7 @@ criar usuários e que gere
 relatório mensal financeiro para o usuário.
 
 
-##stack
+###stack
 + Linguagem - Java
 + Ambiente de desenvolvimento - IntelliJ IDEA Comunity Edition
 
@@ -136,14 +136,14 @@ Para o login é necessário:
     + Body
         ```json
         {
-          "email": "Email do usuário.",
-          "password": "Senha do usuário."
+          "email": "Email do usuário. (Ex.: teste@teste.com)",
+          "password": "Senha do usuário. (Ex.: 12345)"
         }
         ```
 + Response 200 - Ok (application/json) <br/>
   ```json
     {
-       "token": "JWT_TOKEN",
+       "token": "JWT_TOKEN (Ex.: eyJhbGciOiJIezI1NiJ9.eyJpc3MiOiJBUEkgbW9dZXlDb240cm9sIiwic3ViIjoiOTk5OTk5OTkiLCJpYXQiOjE2NDU5OTk0NTEsImV4cCI6MTY0NjA4NTg1MX0.1YtjnlHeWV5P9kNDV1olxxbCU4mqHxCR90JGfdzg21w)",
        "type": "Bearer"
     }
   ```
@@ -211,7 +211,7 @@ As receitas são todos os ganhos financeiras do usuário.
     "numberOfElements": 3,
     "first": true,
     "empty": false
-}
+    }
     ```
 
 ### Cadastrar [POST]

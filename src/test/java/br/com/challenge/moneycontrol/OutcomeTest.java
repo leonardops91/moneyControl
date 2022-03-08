@@ -205,4 +205,5 @@ public class OutcomeTest {
                 .andExpect(status().isNotFound());
         verify(outcomeRepository, times(1)).findById(2);
     }
+
 }

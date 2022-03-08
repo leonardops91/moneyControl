@@ -35,8 +35,8 @@ public class ResumeController {
     private UserController userController;
 
     @GetMapping("/{year}/{month}")
-    public Map<String,Map<String, Double>> test(@PathVariable int year,
-                                     @PathVariable int month) {
+    public Map<String,Map<String, Double>> getResume(@PathVariable int year,
+                                                     @PathVariable int month) {
         LocalDate initialDate = LocalDate.of(year, month, 1);
         LocalDate finalDate = LocalDate.of(year, month, initialDate.lengthOfMonth());
         Map<String, Double> totalBalance = new HashMap<>();

@@ -91,17 +91,6 @@ public class IncomeController {
         return IncomeDTO.convert(incomes);
     }
 
-    //    @GetMapping
-//    @Cacheable(value = "ListaDeIncomes")
-//    public List<IncomeDTO> list(@PageableDefault(sort = "id", direction =
-//            Sort.Direction.DESC, page = 0, size = 10) Pageable paginacao) {
-//        List<Income> incomes = incomeRepository.findAll();
-//        List<IncomeDTO> incomesDTO = IncomeDTO.convert(incomes);
-//        incomesDTO.forEach(incomeDTO -> {
-//            System.out.println(incomeDTO.getDescription());
-//        });
-//        return incomesDTO;
-//    }
     @PostMapping(
             produces = MediaType.APPLICATION_JSON_VALUE)
     @Transactional
@@ -114,19 +103,8 @@ public class IncomeController {
         URI uri =
                 uriBuilder.path("/income/{id}").buildAndExpand(income.getId()).toUri();
         return ResponseEntity.created(uri).body(new IncomeDTO(income));
-    }
-//    @PostMapping(
-//            produces = MediaType.APPLICATION_JSON_VALUE)
-//    @CacheEvict(value = "ListaDeIncomes", allEntries = true)
-//    public String save(@RequestBody @Valid IncomeForm incomeForm,
-//                       UriComponentsBuilder uriBuilder) {
-//        Income income = incomeForm.convert();
-//        incomeRepository.save(income);
-//        URI uri =
-//                uriBuilder.path("/income/{id}").buildAndExpand(income.getId()).toUri();
-//        return "Ok, salvo com sucesso!";
-//    }
 
+    }
 
     @PutMapping("/{id}")
     @Transactional
@@ -151,7 +129,7 @@ public class IncomeController {
         if (incomeOptional.isPresent() &&
                 incomeOptional.get().getUser().equals(userController.currentUser())) {
             incomeRepository.deleteById(id);
-            return ResponseEntity.ok().build();
+            return ResponseEntity.ok().body("Receita removida com sucesso!");
         }
         return ResponseEntity.notFound().build();
     }

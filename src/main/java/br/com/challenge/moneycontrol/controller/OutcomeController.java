@@ -111,14 +111,9 @@ public class OutcomeController {
         Optional<Outcome> outcomeOptional = outcomeRepository.findById(id);
         if (outcomeOptional.isPresent() && outcomeOptional.get().getUser().equals(userController.currentUser())) {
             outcomeRepository.deleteById(id);
-            return ResponseEntity.ok().build();
+            return ResponseEntity.ok().body("Despesa removida com sucesso!");
         }
         return ResponseEntity.notFound().build();
     }
 
-//    @GetMapping("?descricao={description}")
-//    public ResponseEntity<OutcomeDTO> getByDescription(@RequestParam String description){
-//        Outcome outcome = outcomeRepository.findByDescription(description);
-//        return ResponseEntity.ok(new OutcomeDTO(outcome));
-//    }
 }

@@ -13,7 +13,7 @@ criar usuários e que gere
 relatório mensal financeiro para o usuário.
 
 
-###stack
+### Stack
 + Linguagem - Java
 + Ambiente de desenvolvimento - IntelliJ IDEA Comunity Edition
 
